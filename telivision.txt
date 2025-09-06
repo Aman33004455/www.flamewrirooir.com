@@ -1,0 +1,112 @@
+<?php
+// ভিডিও আপলোড হ্যান্ডেল
+if(isset($_FILES['video'])){
+    $uploadDir = "videos/";
+    if(!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $filename = basename($_FILES['video']['name']);
+    $targetFile = $uploadDir . $filename;
+
+    if(move_uploaded_file($_FILES['video']['tmp_name'], $targetFile)){
+        // তারিখ fix করা
+        $date = $_POST['date']; // yyyy-mm-dd
+        $time = strtotime($date);
+        if($time) touch($targetFile, $time);
+        $uploadMsg = "ভিডিও সফলভাবে আপলোড হয়েছে!";
+    }else{
+        $uploadMsg = "আপলোডে সমস্যা হয়েছে।";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flame Television</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; }
+header { background:#ff4500; color:white; padding:20px 0; text-align:center; }
+nav { display:flex; justify-content:center; background:#333; }
+nav a { color:white; padding:14px 20px; text-decoration:none; cursor:pointer; }
+nav a:hover { background:#ff4500; }
+.container { padding:20px; max-width:1200px; margin:auto; }
+.news-card, .video-card { background:white; margin:10px 0; padding:15px; border-radius:5px; box-shadow:0 0 5px rgba(0,0,0,0.1); }
+footer { text-align:center; padding:15px; background:#333; color:white; margin-top:20px; }
+.hidden { display:none; }
+.video-container { text-align:center; margin:20px 0; }
+form input, form label { display:block; margin:10px 0; }
+</style>
+</head>
+<body>
+<header>
+<h1>Flame Television</h1>
+<p>আপনার নতুন বাংলা খবরের উৎস</p>
+</header>
+
+<nav>
+<a onclick="showSection('home')">হোম</a>
+<a onclick="showSection('upload')">ভিডিও আপলোড</a>
+<a onclick="showSection('contact')">যোগাযোগ</a>
+</nav>
+
+<div class="container">
+
+<section id="home">
+<h2>সর্বশেষ ভিডিও</h2>
+<?php
+$dir = "videos/";
+$files = glob($dir . "*.mp4"); 
+if($files){
+    foreach($files as $file){
+        echo '<div class="video-card">';
+        echo '<video width="600" controls>';
+        echo '<source src="'.$file.'" type="video/mp4">';
+        echo 'আপনার ব্রাউজার ভিডিও সমর্থন করে না।';
+        echo '</video>';
+        $timestamp = filemtime($file);
+        echo '<p>তারিখ: '.date("d-m-Y",$timestamp).'</p>';
+        echo '<p style="text-align:center;">&copy; Flame Television</p>';
+        echo '</div>';
+    }
+}else{
+    echo '<p>কোনো ভিডিও আপলোড করা হয়নি।</p>';
+}
+?>
+</section>
+
+<section id="upload" class="hidden">
+<h2>ভিডিও আপলোড করুন</h2>
+<?php if(isset($uploadMsg)) echo '<p>'.$uploadMsg.'</p>'; ?>
+<form action="" method="post" enctype="multipart/form-data">
+<label>ভিডিও ফাইল নির্বাচন করুন:</label>
+<input type="file" name="video" accept="video/mp4" required>
+<label>আপলোডের তারিখ (যেমন: 2024-05-10):</label>
+<input type="date" name="date" required>
+<input type="submit" value="আপলোড করুন">
+</form>
+</section>
+
+<section id="contact" class="hidden">
+<h2>যোগাযোগ করুন</h2>
+<p>ইমেল: <strong>flamewarriors69@gmail.com</strong></p>
+<p>ফোন: +880 123 456 789</p>
+</section>
+
+</div>
+
+<footer>
+&copy; Flame Television
+</footer>
+
+<script>
+function showSection(sectionId){
+const sections=['home','upload','contact'];
+sections.forEach(id => document.getElementById(id).classList.add('hidden'));
+document.getElementById(sectionId).classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>
